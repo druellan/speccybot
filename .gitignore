@@ -1,0 +1,15 @@
+## Windows detritus
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Mac crap
+.DS_Store
+
+## Linux things
+.trash
+
+## The Bot
+credentials/*
+vendor/*
