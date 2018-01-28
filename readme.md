@@ -4,9 +4,9 @@ Este dódigo se considera todavía una prueba de concepto, para nada terminado, 
 
 ### Instalación
 
-El **Webhook** del bot, se encuentra en la carpeta **/roboter**, y se considera el root del proyecto.
+El **Webhook** del bot, se encuentra en la carpeta raiz, y se considera el root del proyecto.
 
-Las credenciales de acceso para los diferentes servicios (Telegram, Youtube API, MySQL, etc) deben estar en la carpeta **/roboter/credentials** en un archivo **global.php** similar a este:
+Las credenciales de acceso para los diferentes servicios (Telegram, Youtube API, MySQL, etc) deben estar en la carpeta **/credentials** en un archivo **global.php** similar a este:
 
 ```php
 <?php
@@ -15,19 +15,14 @@ $bot_api_key  = 'TELEGRAM_BOT_API_KEY';
 $bot_username = 'BOT_USERNAME';
 $yt_api_key = "YT_API_KEY";
 
-// Enter your MySQL database credentials
-//$mysql_credentials = [
-//    'host'     => 'localhost',
-//    'user'     => 'dbuser',
-//    'password' => 'dbpass',
-//    'database' => 'dbname',
-//];
+// Canales que serán inspeccionados por el comando /quever
+$yt_channels = array(
+	"Spectrumero Javi Ortiz" => "UCSaVwN8v8iRnys6aZqEVQqA",
+	"Darío Ruellan" => "UCVAMJjuVMVPZydNVBAFphwQ"
+);
 
-// Define all IDs of admin users in this array (leave as empty array if not used)
-
-$admin_users = [
-	"Druellan"
-];
+// Canales en los cuales el bot puede interactuar
+$allowed_chans = array( "-1001133699410", "-263275991" );
 ```
 
 De necesitar otras credenciales como Google Services, el Json de configuración también puede ser agregado a dicha carpeta.
@@ -42,7 +37,6 @@ composer install
 
 El bot está construido empleando la librería de Armando Lüscher. Documentacipon en https://github.com/php-telegram-bot/core y en ejemplo en: https://github.com/php-telegram-bot/example-bot
 
+### Soporte
 
-
-
-
+Tenemos un canal de desarrollo y soporte en **Telegram**: https://t.me/joinchat/GF2QNg-xRdd9cQFRjoDXNQ Están invitados a hacer preguntas y comentarios.

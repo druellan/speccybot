@@ -65,22 +65,7 @@ try {
 	// e.g. Google geocode/timezone api key for /date command
 	$telegram->setCommandConfig('quever', [
 		'yt_api_key' => $yt_api_key,
-		'channels' => array(
-			"Spectrumero Javi Ortiz" => "UCSaVwN8v8iRnys6aZqEVQqA",
-			"Juanje Juega" => "UCUsHxttmxg56rA-ceIa4tNA",
-			"El Mundo del Spectrum" => "UCLTqphuZ-CstdFRwqcUp9cA",
-			"Arnau Jess" => "UCAz8lXjzd8TZkbbID_qSakA",
-			"Brownym" => "UCL7NRQJaV_jntyPpx1VV47w",
-			"Fase Bonus" => "UCus71Z1cXjbk0LF2YzC8abg",
-			"Marc Max" => "UCHBEEPV53SmbgQPyt9UKXxA",
-			"Diego Mascarell" => "UCXe557b-g5tML5L2sJ870yw",
-			"AsteroideZX" => "UC2xYxR_LCpHtLz9v5UZrjiQ",
-			"Constelación Commodore" => "UCDWBMTk0wXgh9QNxkKxLjag",
-			"Juan José Arenas" => "UCbR7S8JbyQlR13W7v-0WMxQ",
-			"Cutreman de TVcutre" => "UCxU9H4ZXiFyGAr8ez3CB5XQ",
-			"Complejo Lambda TV" => "UCtgAHfPWPEUXkoem9jlb0gg",
-			"Darío Ruellan" => "UCVAMJjuVMVPZydNVBAFphwQ"
-		)
+		'channels' => $yt_channels
 	]);
 
 
