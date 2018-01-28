@@ -34,7 +34,7 @@ composer install
 
 ### Dependencias
 
-El bot está construido empleando la librería de Armando Lüscher. Documentacipon en https://github.com/php-telegram-bot/core y un ejemplo en: https://github.com/php-telegram-bot/example-bot
+El bot está desarrollado empleando la librería de Armando Lüscher. Documentación en https://github.com/php-telegram-bot/core y un ejemplo en: https://github.com/php-telegram-bot/example-bot
 
 ### Soporte
 
