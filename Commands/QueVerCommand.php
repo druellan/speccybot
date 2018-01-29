@@ -188,7 +188,7 @@ class QueVerCommand extends UserCommand
 		
 		// Extract only useful information
 		foreach ($channels as $name => $chan) {
-			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.'&maxResults='.$maxResults.'&key='.$API_key.''));
+			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key.''));
 
 			foreach ( $video->items AS $item ) {
 				$category = $item->snippet->liveBroadcastContent;
