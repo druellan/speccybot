@@ -10,6 +10,9 @@ Todas las credenciales necesarias para el funcionamiento del BOT (Telegram), com
 ```php
 <?php
 
+//The direct URL to your webhook, HTTPS
+$webhook_url = "URL_TO_YOUR_WEBHOOK";
+
 $bot_api_key  = 'TELEGRAM_BOT_API_KEY';
 $bot_username = 'BOT_USERNAME';
 $yt_api_key = "YT_API_KEY";
@@ -22,6 +25,10 @@ $yt_channels = array(
 
 // Canales en los cuales el bot puede interactuar
 $allowed_chans = array( "-1001133699410", "-263275991" );
+
+// We use it to normalize the ammount of lines the bot pushes to Telegram
+define("OUTPUTLINES", 4);
+
 ```
 
 De necesitar otras credenciales como Google Services, el Json de configuración también puede ser agregado a dicha carpeta.

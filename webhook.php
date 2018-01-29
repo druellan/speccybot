@@ -28,11 +28,6 @@ if ($ip_dec < $lower_dec || $ip_dec > $upper_dec) {
 // Load composer
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/credentials/global.php';
-
-
-// I think there is a way to pass this variable
-// using setCommandConfig?
-define("OUTPUTLINES", 4);
 	
 // Define all paths for your custom commands in this array (leave as empty array if not used)
 $commands_paths = [

@@ -4,14 +4,12 @@
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/credentials/global.php';
 
-$hook_url = '';
-
 try {
     // Create Telegram API object
     $telegram = new Longman\TelegramBot\Telegram($bot_api_key, $bot_username);
 
     // Set webhook
-    $result = $telegram->setWebhook($hook_url);
+    $result = $telegram->setWebhook($webhook_url);
     if ($result->isOk()) {
         echo $result->getDescription();
     }
