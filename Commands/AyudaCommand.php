@@ -77,7 +77,7 @@ class AyudaCommand extends UserCommand
 			}
 
 			// We send the help via private message.
-			$data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>." . PHP_EOL . "💡 Puedes usar esta misma ventana para emplear el bot en privado.";
+			$data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>." . PHP_EOL . "💡 Puedes usar este mismo chat para emplear el bot en privado.";
 			return Request::sendMessage($data);
 		}
 		$command_str = str_replace('/', '', $command_str);

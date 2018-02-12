@@ -13,8 +13,8 @@ class QueVerCommand extends UserCommand
 {
 	protected $name = 'quever';
 	protected $description = 'Muestra una recomendación para ver en YouTube.';
-	protected $usage = '/quever endirecto o /quever <canal>';
-	protected $version = '1.7';
+	protected $usage = '/quever live o /quever <canal> o /quever <búsqueda>';
+	protected $version = '1.8';
 
 	public function execute()
 	{
@@ -70,7 +70,7 @@ class QueVerCommand extends UserCommand
 					$response = "Lo último de <b>{$chann}</b>:\n";
 					$response .= $this->listChanns(false, $result, OUTPUTLINES);
 				} else {
-					$response = "No encontré videos recientes para el canal <b>{$command_str}</b>.";
+					$response = $this->listChanns(false, false, 10, $command_str);
 				}
 				
 			} else {
@@ -116,13 +116,13 @@ class QueVerCommand extends UserCommand
 	// }
 
 	/**
-	 * Returns de video list
+	 * Returns the list of videos
 	 * @return string
 	 */
-	private function listChanns($event_type = false, $channels = false, $maxResults = 1) {
+	private function listChanns($event_type = false, $channels = false, $maxResults = 1, $query = "") {
 		
 		if ( !$channels ) $channels = $this->getConfig('channels');
-		$videolist = $this->fetchYT($channels, $maxResults);
+		$videolist = $this->fetchYT($channels, $maxResults, $query);
 
 		$has_live = false;
 		$count = 0;
@@ -173,6 +173,7 @@ class QueVerCommand extends UserCommand
 		return $response;
 	}
 
+
 	/**
 	 * Go fetch the latest video of the list of channels
 	 * Sort'em based on date
@@ -180,15 +181,18 @@ class QueVerCommand extends UserCommand
 	 * @var int $maxResults
 	 * @return array
 	 */
-	private function fetchYT($channels, $maxResults = 1) {
+	private function fetchYT($channels, $maxResults = 1, $search = "") {
 		//Get videos from channels by YouTube Data API
 		$API_key = $this->getConfig('yt_api_key');
+		// Perhaps there is a search query?
+		$searchq = "";
+		if ( $search ) $searchq = "&q=".$search;
 
 		$videolist = array();
 		
 		// Extract only useful information
 		foreach ($channels as $name => $chan) {
-			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key.''));
+			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.$searchq.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key));
 
 			foreach ( $video->items AS $item ) {
 				$category = $item->snippet->liveBroadcastContent;
