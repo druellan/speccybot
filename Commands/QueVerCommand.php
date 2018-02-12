@@ -12,9 +12,9 @@ use Longman\TelegramBot\Request;
 class QueVerCommand extends UserCommand
 {
 	protected $name = 'quever';
-	protected $description = 'Muestra una recomendación para ver en YouTube.';
-	protected $usage = '/quever live o /quever <canal> o /quever <búsqueda>';
-	protected $version = '1.8';
+	protected $description = 'Muestra novedades en YouTube, de una lista de canales amigos. Avisa cuando hay eventos programados o en directo.';
+	protected $usage = '/quever o /quever live o /quever <canal> o /quever <búsqueda>';
+	protected $version = '1.9';
 
 	public function execute()
 	{
@@ -66,11 +66,15 @@ class QueVerCommand extends UserCommand
 					}
 				}
 				
+				// Match! show some results
 				if ( count($result) > 0 ) {
-					$response = "Lo último de <b>{$chann}</b>:\n";
+					$response = "Lo último de <a href='https://www.youtube.com/channel/{$id}'>{$chann}</a>:\n\n";
 					$response .= $this->listChanns(false, $result, OUTPUTLINES);
+				
+				// No match, perhaps we are trying to search the channels?
 				} else {
-					$response = $this->listChanns(false, false, 10, $command_str);
+					$response = "Buscando <b>{$command_str}</b> en los canales amigos:\n\n";
+					$response .= $this->search($command_str);
 				}
 				
 			} else {
@@ -115,17 +119,19 @@ class QueVerCommand extends UserCommand
 	// 	return $pre.$videolist[$area][0]['channel'].": <a href='https://www.youtube.com/watch?v=".$videolist[$area][0]['id']."'>".$videolist[$area][0]['title']."</a>";
 	// }
 
+
 	/**
 	 * Returns the list of videos
 	 * @return string
 	 */
-	private function listChanns($event_type = false, $channels = false, $maxResults = 1, $query = "") {
+	private function listChanns($event_type = false, $channels = false, $maxResults = 1) {
 		
 		if ( !$channels ) $channels = $this->getConfig('channels');
-		$videolist = $this->fetchYT($channels, $maxResults, $query);
+		$videolist = $this->fetchYT($channels, $maxResults);
 
 		$has_live = false;
 		$count = 0;
+		$resources = "";
 		
 		// Live events
 		if ( count($videolist['live']) ) {
@@ -168,17 +174,55 @@ class QueVerCommand extends UserCommand
 			$response .= $flag." <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a> por {$item['channel']}  ◷ {$time[1]}\n";
 		}
 
-		$response .= "\n🎙️ en directo  ⏰ programado  📺 diferido";
+		if ( empty($response) ) $response .= "\nNo se encontraron videos. Esto es inusual, posiblemente un error. Prueba de nuevo en unos minutos o tírale la culpa a @druellan.";
+		else $response .= "\n🎙️ en directo  ⏰ programado  📺 diferido";
 
 		return $response;
 	}
 
 
 	/**
-	 * Go fetch the latest video of the list of channels
+	 * Search the channels
+	 *
+	 * @param [string] $query
+	 * @return string
+	 */
+	private function search($query) {
+		$channels = $this->getConfig('channels');
+
+		// could be more than one match per channel, so, we fetch many results
+		$channelCount = count($channels);
+		$maxResults = $channelCount * 2;
+		$videolist = $this->fetchYT($channels, $maxResults, $query);
+
+		$count = 0;
+		$response = "";
+		$searched = array();
+		$url_query = urlencode($query);
+
+		// For now we list only video, no live streams or events
+		foreach ( $videolist['none'] AS $item ) {
+	
+			// If we have too many entries, skip the rest
+			if ( $count++ > OUTPUTLINES ) break;
+
+			$response .= "📺 <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a> por {$item['channel']} - <a href='https://www.youtube.com/channel/{$item['channelId']}/search?query={$url_query}'>más del canal</a>\n";
+		}
+
+		if ( empty($response) ) $response .= "No se encontraron videos en {$channelCount} canales amigos.";
+
+		$response .= "\n<a href='https://www.youtube.com/results?search_query={$url_query}'>Más resultados en YouTube</a>";
+
+		return $response;
+	}
+
+
+	/**
+	 * Go fetch the latest videos from the channels
 	 * Sort'em based on date
 	 * @var array $channels
 	 * @var int $maxResults
+	 * @var string $search
 	 * @return array
 	 */
 	private function fetchYT($channels, $maxResults = 1, $search = "") {
@@ -190,7 +234,7 @@ class QueVerCommand extends UserCommand
 
 		$videolist = array();
 		
-		// Extract only useful information
+		// We are still using the "search" action. This is expensive and does not allow multiple channel search. An alternative is to use "actions", but we need to rething the logic, specially for live content.
 		foreach ($channels as $name => $chan) {
 			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.$searchq.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key));
 
@@ -198,6 +242,7 @@ class QueVerCommand extends UserCommand
 				$category = $item->snippet->liveBroadcastContent;
 				$videolist[$category][] = array(
 					"id" => $item->id->videoId,
+					"channelId" => $chan,
 					"channel" => $item->snippet->channelTitle,
 					"title" => $item->snippet->title,
 					"date" => $item->snippet->publishedAt
