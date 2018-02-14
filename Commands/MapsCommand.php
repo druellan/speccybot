@@ -15,7 +15,7 @@ class MapsCommand extends UserCommand
 	protected $name = 'maps';
 	protected $description = 'Busca en maps.speccy.cz y devuelve los mapas encontrados.';
 	protected $usage = '/maps <nombre>';
-	protected $version = '2.0';
+	protected $version = '2.1';
 
 	/**
 	 * Source of information
@@ -70,7 +70,9 @@ class MapsCommand extends UserCommand
 			break;
 			default:
 
-			$response = $this->searchMap($command_str);
+			// Short names can cause a flood on the channel, better to enforce bigger names
+			if ( strlen ($command_str) < 3 ) $response = "Por favor, busca un nombre con más de 3 letras.";
+			else $response = $this->searchMap($command_str);
 			
 		}
 
@@ -108,7 +110,7 @@ class MapsCommand extends UserCommand
 
 		// Nothing found
 		if ( count($output_array) == 0 ) {
-			return "No encontré un mapa para <b>{$q}</b>. Prueba busca en el <a href='{$this->source}'>índice alfabético</a>.";
+			return "No encontré un mapa para <b>{$q}</b>. Prueba buscando en el <a href='{$this->source}'>índice alfabético</a>.";
 		}
 
 		// One map found
@@ -135,7 +137,7 @@ class MapsCommand extends UserCommand
 
 		preg_match("%map.php\?id=(.*?)&%i",$ele[2], $match);
 		$map_id = $match[1];
-		return "️🗺️ <a href='https://maps.speccy.cz/maps/{$map_id}.png'>{$ele[3]}</a>";
+		return "️🗺️  <a href='https://maps.speccy.cz/maps/{$map_id}.png'>{$ele[3]}</a>";
 
 	}
 		
