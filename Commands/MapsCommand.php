@@ -13,14 +13,28 @@ class MapsCommand extends UserCommand
 {
 
 	protected $name = 'maps';
-	protected $description = 'Busca en maps.speccy.cz y devuelve el URL del mapa.';
+	protected $description = 'Busca en maps.speccy.cz y devuelve los mapas encontrados.';
 	protected $usage = '/maps <nombre>';
-	protected $version = '1.0';
+	protected $version = '2.0';
 
 	/**
 	 * Source of information
 	 */
 	private $source = "https://maps.speccy.cz/";
+
+	/**
+	 * The file we are going to use as cache
+	 *
+	 * @var string
+	 */
+	private $cache_file = "/home/dariogr/public_html/roboter/cache/mapslist.html";
+
+	/**
+	 * The url of the map list for caching
+	 *
+	 * @var string
+	 */
+	private $maplist_url = "https://maps.speccy.cz/index.php?sort=4&part=99";
 
 
 	public function execute()
@@ -30,7 +44,7 @@ class MapsCommand extends UserCommand
 		$chat_id = $message->getChat()->getId();
 		$command_str = trim($message->getText(true));
 
-		$working_msg = Request::sendMessage([ "chat_id" => $chat_id, "text" => "Buscando el mapa..." ]);
+		$working_msg = Request::sendMessage([ "chat_id" => $chat_id, "text" => "Buscando mapas..." ]);
 
 		// Commands or no commands?
 		switch ($command_str) {
@@ -44,6 +58,13 @@ class MapsCommand extends UserCommand
 			// case "sorpréndeme":			
 
 			// break;
+			case "clearcache":
+
+			$refresh = $this->refreshCache(true);
+			if ( $refresh == true ) $response = "El cache fue actualizado.";
+			else $response = "El cache NO pudo actualizarse.";
+
+			break;
 			case "source":
 				$response = "> ".$this->source;
 			break;
@@ -53,11 +74,16 @@ class MapsCommand extends UserCommand
 			
 		}
 
+		// We try to detect long responses
+		$disable_preview = false;
+		if ( strpos($response, 'mapas') ) $disable_preview = true;
+
 		// Return on html format
 		$data = [
 			'chat_id'    => $chat_id,
 			'text'       => $response,
 			'message_id' => $working_msg->result->message_id,
+			'disable_web_page_preview' => $disable_preview,
 			'parse_mode' => 'html'
 		];
 		return Request::editMessageText($data);
@@ -69,35 +95,68 @@ class MapsCommand extends UserCommand
 	 * @param $q searh query
 	 * @return string
 	 */
-	private function searchMap($q, $alternate = false) {
+	private function searchMap($q) {
 
-		$q = str_replace(' ', '', $q);
-		$url = $this->source."map.php?id=".urlencode($q).(($alternate) ? "1" : "");
+		$this->refreshCache();
 
 		// Fetch the page
 		$context = stream_context_create();
-		$html = file_get_contents($url, false, $context);
+		$html = file_get_contents($this->cache_file, false, $context);
 
-		// Walk the DOM
-		$dom = new \DOMDocument();
-		@$dom->loadHTML($html);
+		// Sick of xpath, lets solve this using a regex
+		preg_match_all('%<a title="(.*?)" href="(.*?)">((?:.*?)'.$q.'(?:.*?))</a>%i', $html, $output_array, PREG_SET_ORDER);
 
-		// Maps are always a single PNG, so, we seek for that
-		$src = $dom->getElementById('obrazek')->getAttribute("src");
-
-		// It's empty? we can try a couple of guess
-		if ( $src == "maps/" && !$alternate ) {
-			$response = $this->searchMap($q, true);
+		// Nothing found
+		if ( count($output_array) == 0 ) {
+			return "No encontré un mapa para <b>{$q}</b>. Prueba busca en el <a href='{$this->source}'>índice alfabético</a>.";
 		}
 
-		else if ( $src == "maps/" ) {
-			$response = "No hay un mapa de <b>{$q}</b>. Recuerda que el nombre debe ser exacto y sin espacios. Si no estás seguro, busca en el <a href='{$this->source}'>índice alfabético</a>.";
+		// One map found
+		if ( count($output_array) == 1 ) {
+			return "Encontré un mapa  ".$this->makeLink($output_array[0]);
 		}
 
-		else {
-			$response = "Encontré este  🗺️ {$this->source}{$src}";
+		// Multiple maps found
+		$response = "Encontré estos mapas:\n";
+		foreach ($output_array as $map) {
+			$response .= $this->makeLink($map)."\n";
 		}
 
 		return $response;
+	}
+
+
+	/**
+	 * Create a link based on the map information
+	 * 
+	 * return string
+	 */
+	private function makeLink($ele) {
+
+		preg_match("%map.php\?id=(.*?)&%i",$ele[2], $match);
+		$map_id = $match[1];
+		return "️🗺️ <a href='https://maps.speccy.cz/maps/{$map_id}.png'>{$ele[3]}</a>";
+
+	}
+		
+
+	/**
+	 * Refresh de cache file when needed
+	 *
+	 * @return bool
+	 */
+	private function refreshCache($force = false) {
+		// This could become a ver long list, so Let´s try cache it
+		if ( !(file_exists($this->cache_file) && (filemtime($this->cache_file) > (time() - 60 * 60 * 12 ))) || $force) {
+			// If no cache is present, or cache is old, lets fetch the file
+			try {
+				$html_file = file_get_contents($this->maplist_url);
+				file_put_contents($this->cache_file, $html_file, LOCK_EX);
+			} catch (Exception $e) {
+				return false;
+			}
+
+			return true;
+		}
 	}
 }
