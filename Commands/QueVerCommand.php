@@ -203,10 +203,10 @@ class QueVerCommand extends UserCommand
 		// For now we list only video, no live streams or events
 		foreach ( $videolist['none'] AS $item ) {
 	
+			$response .= "📺 <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a> por {$item['channel']} - <a href='https://www.youtube.com/channel/{$item['channelId']}/search?query={$url_query}'>más del canal</a>\n";
+
 			// If we have too many entries, skip the rest
 			if ( $count++ > OUTPUTLINES ) break;
-
-			$response .= "📺 <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a> por {$item['channel']} - <a href='https://www.youtube.com/channel/{$item['channelId']}/search?query={$url_query}'>más del canal</a>\n";
 		}
 
 		if ( empty($response) ) $response .= "No se encontraron videos en {$channelCount} canales amigos.";
