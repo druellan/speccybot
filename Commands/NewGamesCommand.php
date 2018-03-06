@@ -148,7 +148,7 @@ class newgamesCommand extends UserCommand
 			fclose($csv_handle);
 
 			// No results?
-			if ( count($result) == 0 ) return "No se encontraron juegos con *{$q}*. Prueba con /wos {$q}.";
+			if ( count($result) == 0 ) return "No se encontraron juegos con *{$q}*. Prueba con /zxinfo {$q}.";
 
 			// Let's compile everythung on a markdown list
 			$response = $this->buildResponse($result, $n_matches);

@@ -12,7 +12,7 @@ use Longman\TelegramBot\Request;
 class QueVerCommand extends UserCommand
 {
 	protected $name = 'quever';
-	protected $description = 'Muestra novedades en YouTube, de una lista de canales amigos. Avisa cuando hay eventos programados o en directo.';
+	protected $description = "Muestra novedades en YouTube, de una lista de canales amigos. Destaca eventos programados o en directo.";
 	protected $usage = '/quever o /quever live o /quever <canal> o /quever <búsqueda>';
 	protected $version = '1.9';
 
@@ -281,6 +281,11 @@ class QueVerCommand extends UserCommand
 			return array ($time, $numberOfUnits.' '.$text.$prural);
 		}
 	
+	}
+
+
+	private function detectCommand($cmds) {
+
 	}
 
 }
