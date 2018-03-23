@@ -15,7 +15,7 @@ class MapsCommand extends UserCommand
 	protected $name = 'maps';
 	protected $description = 'Busca en maps.speccy.cz y devuelve los mapas encontrados.';
 	protected $usage = '/maps <nombre>';
-	protected $version = '2.1';
+	protected $version = '2.2';
 
 	/**
 	 * Source of information
@@ -50,7 +50,7 @@ class MapsCommand extends UserCommand
 		switch ($command_str) {
 			case "":
 				//Hint
-				$response = "Usa <b>".htmlspecialchars($this->usage)."</b>, donde <nombre> es el nombre del juego.";
+				$response = htmlspecialchars("Usa <b>".$this->usage."</b>, donde <nombre> es el nombre del juego.");
 			break;
 
 			// case "*":
@@ -120,8 +120,14 @@ class MapsCommand extends UserCommand
 
 		// Multiple maps found
 		$response = "Encontré estos mapas:\n";
+		$map_count = 0; 
 		foreach ($output_array as $map) {
 			$response .= $this->makeLink($map)."\n";
+			if ( $map_count++ >= OUTPUTLINES ) {
+				$left = count($output_array) - OUTPUTLINES;
+				$response .= "\n<b>{$left}</b> resultados más en <a href='{$this->source}'>maps.speccy.cz</a>.";
+				break;
+			}
 		}
 
 		return $response;

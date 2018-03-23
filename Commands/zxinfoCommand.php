@@ -15,7 +15,7 @@ class zxinfoCommand extends UserCommand
 	protected $name = 'zxinfo';
 	protected $description = 'Busca en ZXInfo. Devuelve una lista de coincidencias.';
 	protected $usage = '/zxinfo <búsqueda>';
-	protected $version = '1.0';
+	protected $version = '1.1';
 
 	/**
 	 * Source of information
@@ -64,7 +64,7 @@ class zxinfoCommand extends UserCommand
 			// case "*":
 			// case "sorprendeme":
 			// case "sorpréndeme":
-			// case "quejugar":			
+			// case "quejugar":
 
 			// $response = "*Un juego aleatorio, cortesía de* [ZXInfo]({$this->source}):\n".$this->searchOnZXinfo(false);
 
@@ -78,7 +78,7 @@ class zxinfoCommand extends UserCommand
 			
 		}
 
-		// Return on markdown format		
+		// Return on markdown format
 		$data = [
 			'chat_id'    => $chat_id,
 			'message_id' => $working_msg->result->message_id,
@@ -142,7 +142,12 @@ class zxinfoCommand extends UserCommand
 			$markdown .= "\xF0\x9F\x95\xB9 [{$title}]({$details_url}) -{$publisher}{$year}{$availability}";
 			
 			if ( !empty($source['releases'][0]['url']) ) {
-				$link = $this->archive_url.$source['releases'][0]['url'];
+				$link_parts = explode("/", $source['releases'][0]['url']);
+				array_walk($link_parts, function(&$val){
+					$val = urlencode($val);
+					return $val;
+				});
+				$link = $this->archive_url.implode("/", $link_parts);
 				$markdown .= " - [Bajar]({$link})";
 			}
 
