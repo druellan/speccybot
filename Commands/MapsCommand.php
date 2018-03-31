@@ -50,7 +50,7 @@ class MapsCommand extends UserCommand
 		switch ($command_str) {
 			case "":
 				//Hint
-				$response = htmlspecialchars("Usa <b>".$this->usage."</b>, donde <nombre> es el nombre del juego.");
+				$response = "Usa <b>".htmlspecialchars($this->usage)."</b>, donde ".htmlspecialchars("<nombre>")." es el nombre del juego.";
 			break;
 
 			// case "*":

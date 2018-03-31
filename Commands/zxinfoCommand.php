@@ -61,14 +61,15 @@ class zxinfoCommand extends UserCommand
 				$response = "Usa *{$this->usage}*";
 			break;
 
-			// case "*":
-			// case "sorprendeme":
-			// case "sorpréndeme":
-			// case "quejugar":
+			case "*":
+			case "sorprendeme":
+			case "sorpréndeme":
+			case "quejugar":
+			case "random":
 
-			// $response = "*Un juego aleatorio, cortesía de* [ZXInfo]({$this->source}):\n".$this->searchOnZXinfo(false);
+			$response = "*Un juego aleatorio, cortesía de* [ZXInfo]({$this->source}):\n".$this->searchOnZXinfo(false);
 
-			// break;
+			break;
 			case "source":
 				$response = "> ".$this->source;
 			break;
@@ -102,10 +103,17 @@ class zxinfoCommand extends UserCommand
 		if ( $q ) {
 			// Lets get ready with the query
 			$options = array(
-				'listtype' => "list",
 				'offset'   => "0",
 				'size'     => $outputlines,
 				'query'    => urlencode($q)
+			);
+			$query = http_build_query($options);
+		} else {
+			// Pick one, random
+			$options = array(
+				'offset'       => "random",
+				'availability' => "Available",
+				'size'         => 1
 			);
 			$query = http_build_query($options);
 		}
@@ -156,7 +164,7 @@ class zxinfoCommand extends UserCommand
 
 		// How many left?
 		$hits_more = $hits_total - $outputlines;
-		if ( $hits_more > 0 ) {
+		if ( $hits_more > 0 && $q ) {
 			$search_more_url = $this->search_url . urlencode($q);
 			$markdown .= "\n[".$hits_more." resultados más en ZXInfo]({$search_more_url})";
 		}
