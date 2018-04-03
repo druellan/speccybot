@@ -14,8 +14,8 @@ class zxinfoCommand extends UserCommand
 
 	protected $name = 'zxinfo';
 	protected $description = 'Busca en ZXInfo. Devuelve una lista de coincidencias.';
-	protected $usage = '/zxinfo <búsqueda>';
-	protected $version = '1.1';
+	protected $usage = '/zxinfo <búsqueda> o /zxinfo novedades o /zxinfo sorpréndeme';
+	protected $version = '1.2';
 
 	/**
 	 * Source of information
@@ -57,8 +57,11 @@ class zxinfoCommand extends UserCommand
 		// Commands or no commands?
 		switch ($command_str) {
 			case "":
+			case "novedades":
+				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, false);
+				
 				//Hint
-				$response = "Usa *{$this->usage}*";
+				$response .= "\nPara otras búsquedas: *{$this->usage}*";
 			break;
 
 			case "*":
@@ -67,7 +70,7 @@ class zxinfoCommand extends UserCommand
 			case "quejugar":
 			case "random":
 
-			$response = "*Un juego aleatorio, cortesía de* [ZXInfo]({$this->source}):\n".$this->searchOnZXinfo(false);
+			$response = "*Un juego aleatorio, cortesía de* [ZXInfo]({$this->source}):\n".$this->searchOnZXinfo(false, true);
 
 			break;
 			case "source":
@@ -96,24 +99,31 @@ class zxinfoCommand extends UserCommand
 	 * @param $q searh query
 	 * @return string
 	 */
-	private function searchOnZXinfo($q = false) {
+	private function searchOnZXinfo($q = false, $random = false) {
 
 		$outputlines = OUTPUTLINES * 2;
 
 		if ( $q ) {
 			// Lets get ready with the query
+			// In this case, we have something to search for
 			$options = array(
-				'offset'   => "0",
-				'size'     => $outputlines,
-				'query'    => urlencode($q)
+				'offset'      => ($random) ? "random" : "0",
+				'size'        => $outputlines,
+				'query'       => urlencode($q),
+				"mode"        => "full",
+				"sort"        => "date_desc",
+				'contenttype' => "SOFTWARE"
 			);
 			$query = http_build_query($options);
 		} else {
-			// Pick one, random
+			// Nothing as query, so we fetch the most recent content
 			$options = array(
-				'offset'       => "random",
+				'offset'       => ($random) ? "random" : "0",
 				'availability' => "Available",
-				'size'         => 1
+				'size'         => ($random) ? "1" : $outputlines,
+				"mode"         => "full",
+				"sort"         => "date_desc",
+				'contenttype'  => "SOFTWARE"
 			);
 			$query = http_build_query($options);
 		}
