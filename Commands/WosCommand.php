@@ -154,7 +154,7 @@ class WosCommand extends UserCommand
 			}
 		}
 
-		if ( $counter == 0 ) $markdown = "No se encontró nada sobre *{$q}* en WOS. Prueba /newgames {$q}";
+		if ( $counter == 0 ) $markdown = "No se encontró nada sobre *{$q}* en WOS. Prueba /zxinfo {$q}";
 
 		return $markdown;
 	}

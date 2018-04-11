@@ -47,6 +47,15 @@ class QueVerCommand extends UserCommand
 				}
 
 			break;
+			case "count":
+
+				$channels = $this->getConfig('channels');
+				$videolist = $this->fetchYT($channels, 1);
+				$response = "Live: ".count($videolist['live']).
+				" upcoming: ".count($videolist['upcoming']).
+				" videos: ".count($videolist['none']);
+
+			break;
 
 			default:
 
@@ -192,7 +201,7 @@ class QueVerCommand extends UserCommand
 
 		// could be more than one match per channel, so, we fetch many results
 		$channelCount = count($channels);
-		$maxResults = $channelCount * 2;
+		$maxResults = 10;
 		$videolist = $this->fetchYT($channels, $maxResults, $query);
 
 		$count = 0;
