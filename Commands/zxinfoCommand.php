@@ -15,7 +15,7 @@ class zxinfoCommand extends UserCommand
 	protected $name = 'zxinfo';
 	protected $description = 'Busca en ZXInfo. Devuelve una lista de coincidencias.';
 	protected $usage = '/zxinfo <búsqueda> o /zxinfo novedades o /zxinfo sorpréndeme';
-	protected $version = '1.2';
+	protected $version = '1.3';
 
 	/**
 	 * Source of information
@@ -150,9 +150,15 @@ class zxinfoCommand extends UserCommand
 
 			$publisher = $source['publisher'][0]['name'];
 			$publisher = ($publisher) ? " {$publisher}" : "";
+
+			// If we don't have a publisher, just use the author
+			if ( !$publisher ) {
+				$publisher = $source['authors'][0]['authors'][0]['name'];
+				$publisher = ($publisher) ? " {$publisher}" : "";
+			}
 			
 			$availability = $source['availability'];
-			$availability = ($availability) ? "  _".$availability."_" : "";
+			$availability = ($availability) ? " _".$availability."_" : "";
 
 			$year = $source['yearofrelease'];
 			$year = ($year) ? " (".$year.")" : "";

@@ -133,7 +133,7 @@ class QueVerCommand extends UserCommand
 	 * Returns the list of videos
 	 * @return string
 	 */
-	private function listChanns($event_type = false, $channels = false, $maxResults = 1) {
+	private function listChanns($event_type = false, $channels = false, $maxResults = 2) {
 		
 		if ( !$channels ) $channels = $this->getConfig('channels');
 		$videolist = $this->fetchYT($channels, $maxResults);
@@ -248,6 +248,10 @@ class QueVerCommand extends UserCommand
 			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.$searchq.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key));
 
 			foreach ( $video->items AS $item ) {
+				
+				// if video is a playlist, skip
+				if( $item->id->kind == "youtube#playlist" ) continue;
+
 				$category = $item->snippet->liveBroadcastContent;
 				$videolist[$category][] = array(
 					"id" => $item->id->videoId,
