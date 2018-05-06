@@ -30,7 +30,8 @@ class zxinfoCommand extends UserCommand
 	/**
 	 * Repository URL
 	 */
-	private $archive_url = "http://www.worldofspectrum.org";
+	private $archive1_url = "http://www.worldofspectrum.org";
+	private $archive2_url = "https://spectrumcomputing.co.uk";
 
 	/**
 	 * Frontend Search
@@ -147,6 +148,7 @@ class zxinfoCommand extends UserCommand
 			$details_url = $this->details_url.$hit['_id'];
 			$source = $hit['_source'];
 			$title = $source['fulltitle'];
+			$link = false;
 
 			$publisher = $source['publisher'][0]['name'];
 			$publisher = ($publisher) ? " {$publisher}" : "";
@@ -165,15 +167,40 @@ class zxinfoCommand extends UserCommand
 
 			$markdown .= "\xF0\x9F\x95\xB9 [{$title}]({$details_url}) -{$publisher}{$year}{$availability}";
 			
+			// Lets see if the image is part of the releases
 			if ( !empty($source['releases'][0]['url']) ) {
-				$link_parts = explode("/", $source['releases'][0]['url']);
+				$link = $source['releases'][0]['url'];
+				$archive = $this->archive1_url;
+			} else {
+				// If not, perhaps there is a link on the "additionals"
+				foreach ( $source['additionals'] as $additional ) {
+					if ( $additional['type'] == "Tape image" ) {
+						$link = $additional['url'];
+						$archive = $this->archive2_url;
+						break;
+					}
+				}
+			}
+
+			// Now lets sanitize the links
+			if ( $link ) {
+				$link_parts = explode("/", $link);
 				array_walk($link_parts, function(&$val){
 					$val = urlencode($val);
 					return $val;
 				});
-				$link = $this->archive_url.implode("/", $link_parts);
+				$link = $archive.implode("/", $link_parts);
 				$markdown .= " - [Bajar]({$link})";
 			}
+
+			// Lets implement the online gamming
+			// Only TAP files are allowed, so
+			// foreach ( $source['additionals'] as $additional ) {
+			// 	if ( $additional['format'] == "(non-TZX) TAP tape" ) {
+			// 		$markdown .= " - [Jugar](".$this->archive2_url."/playonline.php?eml=1&downid=".$hit['_id'].")";
+			// 	}
+
+			// }
 
 			$markdown .= "\n";
 		}
@@ -182,7 +209,7 @@ class zxinfoCommand extends UserCommand
 		$hits_more = $hits_total - $outputlines;
 		if ( $hits_more > 0 && $q ) {
 			$search_more_url = $this->search_url . urlencode($q);
-			$markdown .= "\n[".$hits_more." resultados más en ZXInfo]({$search_more_url})";
+			$markdown .= "\n[".$hits_more." resultados más en ZXInfo.dk]({$search_more_url})";
 		}
 
 		return $markdown;
