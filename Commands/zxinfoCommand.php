@@ -13,7 +13,7 @@ class zxinfoCommand extends UserCommand
 {
 
 	protected $name = 'zxinfo';
-	protected $description = 'Busca en ZXInfo. Devuelve una lista de coincidencias.';
+	protected $description = 'Busca en la ZXDB (ZXInfo/Spectrum Computing). Devuelve una lista de coincidencias.';
 	protected $usage = '/zxinfo <búsqueda> o /zxinfo novedades o /zxinfo sorpréndeme';
 	protected $version = '1.3';
 
@@ -59,7 +59,7 @@ class zxinfoCommand extends UserCommand
 		switch ($command_str) {
 			case "":
 			case "novedades":
-				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, false);
+				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n\n".$this->searchOnZXinfo(false, false);
 				
 				//Hint
 				$response .= "\nPara otras búsquedas: *{$this->usage}*";
@@ -115,20 +115,29 @@ class zxinfoCommand extends UserCommand
 				"sort"        => "date_desc",
 				'contenttype' => "SOFTWARE"
 			);
-			$query = http_build_query($options);
-		} else {
-			// Nothing as query, so we fetch the most recent content
+		} else if ($random) {
+			// Nothing as query, we try random stuff
 			$options = array(
-				'offset'       => ($random) ? "random" : "0",
+				'offset'       => "random",
 				'availability' => "Available",
-				'size'         => ($random) ? "1" : $outputlines,
+				'size'         => "1",
 				"mode"         => "full",
 				"sort"         => "date_desc",
 				'contenttype'  => "SOFTWARE"
 			);
-			$query = http_build_query($options);
+			
+		} else {
+			// Nothing to random? Ok, we try just new things
+			$options = array(
+				'offset'       => "0",
+				'size'         => $outputlines,
+				"mode"         => "full",
+				"sort"         => "date_desc",
+				'contenttype'  => "SOFTWARE"
+			);
 		}
 
+		$query = http_build_query($options);
 		$fetch_url = $this->api_url . $query;
 		
 		// Fetch the data
@@ -211,6 +220,9 @@ class zxinfoCommand extends UserCommand
 			$search_more_url = $this->search_url . urlencode($q);
 			$markdown .= "\n[".$hits_more." resultados más en ZXInfo.dk]({$search_more_url})";
 		}
+
+		// If we are showing news, then just link to Spectrum Computing
+		if ( !$q && !$random ) $markdown .= "\nMás novedades en [Spectrum Computing](https://spectrumcomputing.co.uk/index.php?cat=301)";
 
 		return $markdown;
 	}
