@@ -50,7 +50,7 @@ class QueVerCommand extends UserCommand
 			case "count":
 
 				$channels = $this->getConfig('channels');
-				$videolist = $this->fetchYT($channels, 1);
+				$videolist = $this->fetchYT($channels);
 				$response = "Live: ".count($videolist['live']).
 				" upcoming: ".count($videolist['upcoming']).
 				" videos: ".count($videolist['none']);
@@ -133,8 +133,8 @@ class QueVerCommand extends UserCommand
 	 * Returns the list of videos
 	 * @return string
 	 */
-	private function listChanns($event_type = false, $channels = false, $maxResults = 2) {
-		
+	private function listChanns($event_type = false, $channels = false, $maxResults = 3) {
+
 		if ( !$channels ) $channels = $this->getConfig('channels');
 		$videolist = $this->fetchYT($channels, $maxResults);
 
@@ -228,13 +228,14 @@ class QueVerCommand extends UserCommand
 
 	/**
 	 * Go fetch the latest videos from the channels
+	 * Categorize based on scheduled, live or video 
 	 * Sort'em based on date
 	 * @var array $channels
 	 * @var int $maxResults
 	 * @var string $search
 	 * @return array
 	 */
-	private function fetchYT($channels, $maxResults = 1, $search = "") {
+	private function fetchYT($channels, $maxResults = 3, $search = "") {
 		//Get videos from channels by YouTube Data API
 		$API_key = $this->getConfig('yt_api_key');
 		// Perhaps there is a search query?
@@ -243,7 +244,7 @@ class QueVerCommand extends UserCommand
 
 		$videolist = array();
 		
-		// We are still using the "search" action. This is expensive and does not allow multiple channel search. An alternative is to use "actions", but we need to rething the logic, specially for live content.
+		// We are still using the "search" action. This is expensive and does not allow multiple channel search. An alternative is to use "actions", but we need to rethink the logic, specially for live content.
 		foreach ($channels as $name => $chan) {
 			$video = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId='.$chan.$searchq.'&fields=items(id,snippet)&maxResults='.$maxResults.'&key='.$API_key));
 
