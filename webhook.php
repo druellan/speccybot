@@ -63,6 +63,9 @@ try {
 		'channels' => $yt_channels
 	]);
 
+	$telegram->setCommandConfig('newchatmembers', [
+		'welcome_messages' => $welcome_messages
+	]);
 
 	// This bot is private, check the allowed groups:
 

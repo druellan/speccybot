@@ -31,7 +31,7 @@ class NewchatmembersCommand extends SystemCommand
 	/**
 	 * @var string
 	 */
-	protected $version = '1.2.0';
+	protected $version = '1.3';
 
 	/**
 	 * Command execute method
@@ -45,6 +45,12 @@ class NewchatmembersCommand extends SystemCommand
 
 		$chat_id = $message->getChat()->getId();
 		$members = $message->getNewChatMembers();
+		$welcome_messages = $this->getConfig('welcome_messages');
+		$the_welcome = "";
+
+		if ( isset($welcome_messages[$chat_id]) ) {
+			$the_welcome = $welcome_messages[$chat_id];
+		}
 
 		if (!$message->botAddedInChat()) {
 			$member_names = [];
@@ -57,7 +63,7 @@ class NewchatmembersCommand extends SystemCommand
 			if ( $count == 1 ) $text .= "👋 ¡Bienvenido al canal!\n";
 			else $text .= "👋 ¡Bienvenidos al canal!\n";
 
-			$text .= "Aquí se habla de lo que sea sobre retro, juegos y retrojuegos, también de hardware y programación. Para saber más comandos de este bot escribe /ayuda";
+			$text .= $the_welcome;
 		}
 
 		$data = [

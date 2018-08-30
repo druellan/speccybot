@@ -31,8 +31,8 @@ class QueVerCommand extends UserCommand
 
 		// Is there a specific command?
 		switch ($command_str) {
-			case "endirecto":
-			case "envivo":
+			case "directo":
+			case "vivo":
 			case "live":
 				$response = $response = $this->listChanns("live");
 				$disable_web_page_preview = false;
@@ -148,7 +148,8 @@ class QueVerCommand extends UserCommand
 				$flag = "🎙️";
 				$count++;
 				$has_live = true;
-				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>\n";
+				$time = $this->humanTiming( strtotime($item['date']));
+				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>  ◷ {$time[1]}\n";
 			}
 		}
 
@@ -158,7 +159,8 @@ class QueVerCommand extends UserCommand
 				$flag = "⏰";
 				$count++;
 				$has_live = true;
-				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>\n";
+				$time = $this->humanTiming( strtotime($item['date']));
+				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>  ◷ {$time[1]}\n";
 			}
 		}
 
@@ -290,7 +292,7 @@ class QueVerCommand extends UserCommand
 		foreach ($tokens as $unit => $text) {
 			if ($time < $unit) continue;
 			$numberOfUnits = floor($time / $unit);
-			if ( $text == "mes" ) $prural = (($numberOfUnits>1)?'ses':'');
+			if ( $text == "mes" ) $prural = (($numberOfUnits>1)?'es':'');
 			else $prural = (($numberOfUnits>1)?'s':'');
 			return array ($time, $numberOfUnits.' '.$text.$prural);
 		}
