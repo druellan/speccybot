@@ -66,19 +66,31 @@ class AyudaCommand extends UserCommand
 				}
 			}
 
-			// If the chat is not private, just notify
-			if ( !$safe_to_show ) {
-				$dataPub = [
-					'chat_id'    => $chat_id,
-					'parse_mode' => 'markdown',
-					'text'       => '← la ayuda fue enviada por mensaje privado.'
-				];
-				Request::sendMessage($dataPub);
-			}
+			// // If the chat is not private, just notify
+			// if ( !$safe_to_show ) {
+			// 	$dataPub = [
+			// 		'chat_id'    => $chat_id,
+			// 		'parse_mode' => 'markdown',
+			// 		'text'       => '← la ayuda fue enviada por mensaje privado.'
+			// 	];
+			// 	Request::sendMessage($dataPub);
+			// }
 
 			// We send the help via private message.
-			$data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>." . PHP_EOL . "💡 Puedes usar este mismo chat para emplear el bot en privado.";
+			// $data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>." . PHP_EOL . "💡 Puedes usar este mismo chat para emplear el bot en privado.";
+
+			// The private message thing is cute but is not working
+			// as intended, so, we revert back to a classic help
+			// in the middle of the public room
+
+			$data['chat_id'] = $chat_id;
+			$data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>.";
+
 			return Request::sendMessage($data);
+
+
+
+
 		}
 		$command_str = str_replace('/', '', $command_str);
 		if (isset($all_commands[$command_str]) && ($safe_to_show || !$all_commands[$command_str]->isAdminCommand())) {
