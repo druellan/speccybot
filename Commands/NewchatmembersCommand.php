@@ -69,7 +69,8 @@ class NewchatmembersCommand extends SystemCommand
 		$data = [
 			'chat_id' => $chat_id,
 			'text'    => $text,
-			'parse_mode' => 'markdown'
+			'parse_mode' => 'markdown',
+			'disable_web_page_preview' => true
 		];
 
 		return Request::sendMessage($data);

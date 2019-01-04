@@ -59,7 +59,7 @@ class zxdbCommand extends UserCommand
 		switch ($command_str) {
 			case "":
 			case "novedades":
-				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n\n".$this->searchOnZXinfo(false, false);
+				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, false);
 				
 				//Hint
 				$response .= "\nPara otras búsquedas: *{$this->usage}*";
