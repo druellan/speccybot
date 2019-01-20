@@ -13,7 +13,7 @@ class zxdbCommand extends UserCommand
 {
 
 	protected $name = 'zxdb';
-	protected $description = 'Busca en la ZXDB (ZXInfo/Spectrum Computing). Devuelve una lista de coincidencias.';
+	protected $description = 'Busca cosas de ZX Spectrum y ZX81 en la ZXDB (ZXInfo/Spectrum Computing).';
 	protected $usage = '/zxdb <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
 	protected $version = '1.4';
 

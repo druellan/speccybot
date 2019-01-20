@@ -13,7 +13,7 @@ class newgamesCommand extends UserCommand
 {
 
 	protected $name = 'newgames';
-	protected $description = 'Busca en New Spectrum Games. Devuelve una lista de coincidencias.';
+	protected $description = 'Busca en New Spectrum Games.';
 	protected $usage = '/newgames <búsqueda> o /newgames novedades o /newgames quejugar';
 	protected $version = '1.4';
 

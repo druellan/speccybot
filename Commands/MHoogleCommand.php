@@ -13,7 +13,7 @@ class MHoogleCommand extends UserCommand
 {
 
 	protected $name = 'mhoogle';
-	protected $description = 'Busca contenido en las revistas MicroHobby empleando mhoogle.speccy.org. Devuelve una lista de coincidencias.';
+	protected $description = 'Busca contenido en las revistas MicroHobby.';
 	protected $usage = '/mhoogle <búsqueda>';
 	protected $version = '1.0';
 

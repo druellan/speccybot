@@ -50,8 +50,8 @@ try {
 	// Logging (Error, Debug and Raw Updates)
 	Longman\TelegramBot\TelegramLog::initErrorLog(__DIR__ . "/{$bot_username}_error.log");
 	//Longman\TelegramBot\TelegramLog::initDebugLog(__DIR__ . "/{$bot_username}_debug.log");
-	Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_update.log");
-	
+	//Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_udate.log");
+
 	// Set custom Upload and Download paths
 	//$telegram->setDownloadPath(__DIR__ . '/Download');
 	//$telegram->setUploadPath(__DIR__ . '/Upload');

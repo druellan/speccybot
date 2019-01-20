@@ -13,7 +13,7 @@ class WosCommand extends UserCommand
 {
 
 	protected $name = 'wos';
-	protected $description = 'Busca en World of Spectrum. Devuelve una lista de coincidencias.';
+	protected $description = 'Busca software, hardware o libros en World of Spectrum.';
 	protected $usage = '/wos <búsqueda> o /wos quejugar';
 	protected $version = '1.6';
 

@@ -13,7 +13,7 @@ class MapsCommand extends UserCommand
 {
 
 	protected $name = 'maps';
-	protected $description = 'Busca en maps.speccy.cz y devuelve los mapas encontrados.';
+	protected $description = 'Busca mapas completos de juegos de ZX Spectrum.';
 	protected $usage = '/maps <nombre>';
 	protected $version = '2.2';
 
