@@ -52,6 +52,12 @@ class AyudaCommand extends UserCommand
 			'parse_mode' => 'markdown'
 		];
 
+			// The private message thing is cute but is not working
+			// as intended, so, we revert back to a classic help
+			// in the middle of the public room
+
+			$data['chat_id'] = $chat_id;
+
 		list($all_commands, $user_commands, $admin_commands) = $this->getUserAdminCommands();
 		// If no command parameter is passed, show the list.
 		if ($command_str === '') {
@@ -79,11 +85,6 @@ class AyudaCommand extends UserCommand
 			// We send the help via private message.
 			// $data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>." . PHP_EOL . "💡 Puedes usar este mismo chat para emplear el bot en privado.";
 
-			// The private message thing is cute but is not working
-			// as intended, so, we revert back to a classic help
-			// in the middle of the public room
-
-			$data['chat_id'] = $chat_id;
 			$data['text'] .= PHP_EOL . "ℹ️ Para una ayuda más precisa, usa: /ayuda <comando>.";
 
 			return Request::sendMessage($data);

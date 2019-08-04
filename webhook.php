@@ -4,25 +4,25 @@
 
 // Set the lower and upper limit of valid Telegram IPs.
 // https://core.telegram.org/bots/webhooks#the-short-version
-$telegram_ip_lower = '149.154.167.197';
-$telegram_ip_upper = '149.154.167.233';
+// $telegram_ip_lower = '149.154.160.0';
+// $telegram_ip_upper = '149.154.160.20';
 
-// Get the real IP.
-$ip = $_SERVER['REMOTE_ADDR'];
-foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR'] as $key) {
-    $addr = @$_SERVER[$key];
-    if (filter_var($addr, FILTER_VALIDATE_IP)) {
-        $ip = $addr;
-    }
-}
+// // Get the real IP.
+// $ip = $_SERVER['REMOTE_ADDR'];
+// foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR'] as $key) {
+//     $addr = @$_SERVER[$key];
+//     if (filter_var($addr, FILTER_VALIDATE_IP)) {
+//         $ip = $addr;
+//     }
+// }
 
-// Make sure the IP is valid.
-$lower_dec = (float) sprintf("%u", ip2long($telegram_ip_lower));
-$upper_dec = (float) sprintf("%u", ip2long($telegram_ip_upper));
-$ip_dec    = (float) sprintf("%u", ip2long($ip));
-if ($ip_dec < $lower_dec || $ip_dec > $upper_dec) {
-    die("Acceso restringido para la IP [{$ip}]");
-}
+// // Make sure the IP is valid.
+// $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_lower));
+// $upper_dec = (float) sprintf("%u", ip2long($telegram_ip_upper));
+// $ip_dec    = (float) sprintf("%u", ip2long($ip));
+// if ($ip_dec < $lower_dec || $ip_dec > $upper_dec) {
+//     die("Acceso restringido para la IP [{$ip}]");
+// }
 
 
 // Load composer
@@ -50,7 +50,7 @@ try {
 	// Logging (Error, Debug and Raw Updates)
 	Longman\TelegramBot\TelegramLog::initErrorLog(__DIR__ . "/{$bot_username}_error.log");
 	//Longman\TelegramBot\TelegramLog::initDebugLog(__DIR__ . "/{$bot_username}_debug.log");
-	//Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_udate.log");
+	Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_udate.log");
 
 	// Set custom Upload and Download paths
 	//$telegram->setDownloadPath(__DIR__ . '/Download');
