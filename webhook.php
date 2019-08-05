@@ -2,27 +2,23 @@
 
 // Security as recommended for the bot
 
-// Set the lower and upper limit of valid Telegram IPs.
+// Set the ranges of valid Telegram IPs.
 // https://core.telegram.org/bots/webhooks#the-short-version
-// $telegram_ip_lower = '149.154.160.0';
-// $telegram_ip_upper = '149.154.160.20';
+$telegram_ip_ranges = [
+	['lower' => '149.154.160.0', 'upper' => '149.154.175.255'], // literally 149.154.160.0/20
+	['lower' => '91.108.4.0',    'upper' => '91.108.7.255'],    // literally 91.108.4.0/22
+];
 
-// // Get the real IP.
-// $ip = $_SERVER['REMOTE_ADDR'];
-// foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR'] as $key) {
-//     $addr = @$_SERVER[$key];
-//     if (filter_var($addr, FILTER_VALIDATE_IP)) {
-//         $ip = $addr;
-//     }
-// }
+$ip_dec = (float) sprintf("%u", ip2long($_SERVER['REMOTE_ADDR']));
+$ok=false;
 
-// // Make sure the IP is valid.
-// $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_lower));
-// $upper_dec = (float) sprintf("%u", ip2long($telegram_ip_upper));
-// $ip_dec    = (float) sprintf("%u", ip2long($ip));
-// if ($ip_dec < $lower_dec || $ip_dec > $upper_dec) {
-//     die("Acceso restringido para la IP [{$ip}]");
-// }
+foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
+	// Make sure the IP is valid.
+	$lower_dec = (float) sprintf("%u", ip2long($telegram_ip_range['lower']));
+	$upper_dec = (float) sprintf("%u", ip2long($telegram_ip_range['upper']));
+	if ($ip_dec >= $lower_dec and $ip_dec <= $upper_dec) $ok=true;
+}
+if (!$ok) die("Estoooo... y tú quien eres?");
 
 
 // Load composer
@@ -40,17 +36,20 @@ try {
 
 	// Add commands paths containing your custom commands
 	$telegram->addCommandsPaths($commands_paths);
-	
+
 	// Enable admin users
-	//$telegram->enableAdmins($admin_users);
-	
+	$telegram->enableAdmins($admin_users);
+
 	// Enable MySQL
 	//$telegram->enableMySql($mysql_credentials);
 
 	// Logging (Error, Debug and Raw Updates)
-	Longman\TelegramBot\TelegramLog::initErrorLog(__DIR__ . "/{$bot_username}_error.log");
+	//Longman\TelegramBot\TelegramLog::initErrorLog(__DIR__ . "/{$bot_username}_error.log");
 	//Longman\TelegramBot\TelegramLog::initDebugLog(__DIR__ . "/{$bot_username}_debug.log");
-	Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_udate.log");
+	//Longman\TelegramBot\TelegramLog::initUpdateLog(__DIR__ . "/{$bot_username}_update.log");
+
+	// If you are using a custom Monolog instance for logging, use this instead of the above
+	//Longman\TelegramBot\TelegramLog::initialize($your_external_monolog_instance);
 
 	// Set custom Upload and Download paths
 	//$telegram->setDownloadPath(__DIR__ . '/Download');
@@ -58,6 +57,7 @@ try {
 
 	// Here you can set some command specific parameters
 	// e.g. Google geocode/timezone api key for /date command
+	//$telegram->setCommandConfig('date', ['google_api_key' => 'your_google_api_key_here']);
 	$telegram->setCommandConfig('quever', [
 		'yt_api_key' => $yt_api_key,
 		'channels' => $yt_channels
@@ -89,6 +89,8 @@ try {
 		}
 	}
 
+	// Botan.io integration
+	//$telegram->enableBotan('your_botan_token');
 
 	// Requests Limiter (tries to prevent reaching Telegram API limits)
 	$telegram->enableLimiter();
@@ -101,7 +103,6 @@ try {
 	//echo $e;
 	// Log telegram errors
 	Longman\TelegramBot\TelegramLog::error($e);
-
 } catch (Longman\TelegramBot\Exception\TelegramLogException $e) {
 	// Silence is golden!
 	// Uncomment this to catch log initialisation errors
