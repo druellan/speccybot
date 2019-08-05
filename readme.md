@@ -46,4 +46,4 @@ El bot está desarrollado empleando la librería de Armando Lüscher. Documentac
 
 ### Soporte
 
-Tenemos un canal de desarrollo y soporte en **Telegram**: https://t.me/cuacopecuá Están invitados a hacer preguntas y comentarios.
+Tenemos un canal de desarrollo y soporte en **Telegram**: https://t.me/joinchat/GF2QNlCNRsEszXlt-J3E7Q Están invitados a hacer preguntas y comentarios.
