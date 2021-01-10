@@ -14,8 +14,8 @@ class zxdbCommand extends UserCommand
 
 	protected $name = 'zxdb';
 	protected $description = 'Busca cosas de ZX Spectrum y ZX81 en la ZXDB (ZXInfo/Spectrum Computing).';
-	protected $usage = '/zxdb <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
-	protected $version = '1.4';
+	protected $usage = '/zxdb (--title) (--publisher) (--author) <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
+	protected $version = '1.5';
 
 	/**
 	 * Source of information
@@ -25,7 +25,9 @@ class zxdbCommand extends UserCommand
 	/**
 	 * API entry point
 	 */
-	private $api_url = "http://api.zxinfo.dk/api/zxinfo/v2/search?";
+	private $api_url           = "https://api.zxinfo.dk/api/zxinfo/v2/search?";
+	private $api_url_publisher = "https://api.zxinfo.dk/api/zxinfo/publishers/%s/games?";
+	private $api_url_author    = "https://api.zxinfo.dk/api/zxinfo/authors/%s/games?";
 
 	/**
 	 * Repository URL
@@ -52,14 +54,23 @@ class zxdbCommand extends UserCommand
 		$message = $this->getMessage();
 		$chat_id = $message->getChat()->getId();
 		$command_str = trim($message->getText(true));
+		$operator = false;
 
 		$working_msg = Request::sendMessage([ "chat_id" => $chat_id, "text" => "Buscando en ZXDB..." ]);
+
+		// Let's detect the modificator
+		// TODO: might be nice if we can concatenate other modificators like --random
+		preg_match("%—(.*?) %i", $command_str, $matches);
+		if ( $matches ) {
+			$command_str = str_replace ($matches[0], "", $command_str);
+			$operator = $matches[1];
+		}
 
 		// Commands or no commands?
 		switch ($command_str) {
 			case "":
 			case "novedades":
-				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, false);
+				$response = "Últimas actualizaciones en [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, false, false);
 				
 				//Hint
 				$response .= "\nPara otras búsquedas: *{$this->usage}*";
@@ -71,7 +82,7 @@ class zxdbCommand extends UserCommand
 			case "quejugar":
 			case "random":
 
-			$response = "*Un juego aleatorio, cortesía de la* [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, true);
+			$response = "*Un juego aleatorio, cortesía de la* [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, $operator, true);
 
 			break;
 			case "source":
@@ -79,7 +90,7 @@ class zxdbCommand extends UserCommand
 			break;
 			default:
 
-			$response = $this->searchOnZXinfo($command_str);
+			$response = $this->searchOnZXinfo($command_str, $operator);
 			
 		}
 
@@ -100,9 +111,10 @@ class zxdbCommand extends UserCommand
 	 * @param $q searh query
 	 * @return string
 	 */
-	private function searchOnZXinfo($q = false, $random = false) {
+	private function searchOnZXinfo($q = false, $operator = false, $random = false) {
 
 		$outputlines = OUTPUTLINES * 2;
+		$q = urlencode($q);
 
 		if ( $q ) {
 			// Lets get ready with the query
@@ -110,11 +122,34 @@ class zxdbCommand extends UserCommand
 			$options = array(
 				'offset'      => ($random) ? "random" : "0",
 				'size'        => $outputlines,
-				'query'       => urlencode($q),
 				"mode"        => "full",
 				"sort"        => "date_desc",
 				'contenttype' => "SOFTWARE"
 			);
+
+			switch($operator) {
+				case "publisher":
+				case "label":
+				case "empresa":
+				case "firma":
+
+					$api_url = sprintf($this->api_url_publisher, $q);
+
+				break;
+				case "author":
+				case "autor":
+
+					$api_url = sprintf($this->api_url_author, $q);
+
+				break;
+				case "title":
+				case "titulo":
+				default:
+				
+					$options['query'] = $q;
+					$api_url = $this->api_url;
+			}
+
 		} else if ($random) {
 			// Nothing as query, we try random stuff
 			$options = array(
@@ -125,7 +160,7 @@ class zxdbCommand extends UserCommand
 				"sort"         => "date_desc",
 				'contenttype'  => "SOFTWARE"
 			);
-			
+			$api_url = $this->api_url;
 		} else {
 			// Nothing to random? Ok, we try just new things
 			$options = array(
@@ -135,11 +170,12 @@ class zxdbCommand extends UserCommand
 				"sort"         => "date_desc",
 				'contenttype'  => "SOFTWARE"
 			);
+			$api_url = $this->api_url;
 		}
 
 		$query = http_build_query($options);
-		$fetch_url = $this->api_url . $query;
-		
+		$fetch_url = $api_url . $query;
+	
 		// Fetch the data
 		$json = file_get_contents($fetch_url);
 		$data = json_decode($json, TRUE);
@@ -149,7 +185,7 @@ class zxdbCommand extends UserCommand
 
 		// Nothing found, inform and exit
 		if ( $hits_total == 0 ) {
-			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB. Prueba /wos {$q}";
+			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB.";
 			return $markdown;
 		}
 

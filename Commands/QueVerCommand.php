@@ -13,8 +13,8 @@ class QueVerCommand extends UserCommand
 {
 	protected $name = 'quever';
 	protected $description = "Muestra novedades en YouTube, de una lista de canales amigos. Destaca eventos programados o en directo.";
-	protected $usage = '/quever o /quever live o /quever <canal> o /quever <búsqueda>';
-	protected $version = '1.9';
+	protected $usage = '/quever o /quever directo o /quever <canal> o /quever <búsqueda>. /quever canales para tener una lista de canales amigos.';
+	protected $version = '1.10';
 
 	public function execute()
 	{
@@ -40,10 +40,12 @@ class QueVerCommand extends UserCommand
 
 			case "sources":
 			case "source":
+			case "canales":
 
 				$response = "";
-				foreach ( $this->getConfig('channels') as $source => $id ) {
-					$response .= $source." | ";
+				foreach ( $this->getConfig('channels') as $chann => $id ) {
+					$response .= "📺 <a href='https://www.youtube.com/channel/{$id}'>{$chann}</a>  ";
+					//$response .= $chann." | ";
 				}
 
 			break;
@@ -149,7 +151,7 @@ class QueVerCommand extends UserCommand
 				$count++;
 				$has_live = true;
 				$time = $this->humanTiming( strtotime($item['date']));
-				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>  ◷ {$time[1]}\n";
+				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>\n";
 			}
 		}
 
@@ -160,7 +162,7 @@ class QueVerCommand extends UserCommand
 				$count++;
 				$has_live = true;
 				$time = $this->humanTiming( strtotime($item['date']));
-				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>  ◷ {$time[1]}\n";
+				$response .= $flag." <b>{$item['channel']}</b> sobre <a href='https://www.youtube.com/watch?v={$item['id']}'>{$item['title']}</a>\n";
 			}
 		}
 
