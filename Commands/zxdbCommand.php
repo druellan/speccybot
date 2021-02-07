@@ -15,7 +15,7 @@ class zxdbCommand extends UserCommand
 	protected $name = 'zxdb';
 	protected $description = 'Busca cosas de ZX Spectrum y ZX81 en la ZXDB (ZXInfo/Spectrum Computing).';
 	protected $usage = '/zxdb (--title) (--publisher) (--author) <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
-	protected $version = '1.5';
+	protected $version = '1.6';
 
 	/**
 	 * Source of information
@@ -25,20 +25,20 @@ class zxdbCommand extends UserCommand
 	/**
 	 * API entry point
 	 */
-	private $api_url           = "https://api.zxinfo.dk/api/zxinfo/v2/search?";
-	private $api_url_publisher = "https://api.zxinfo.dk/api/zxinfo/publishers/%s/games?";
-	private $api_url_author    = "https://api.zxinfo.dk/api/zxinfo/authors/%s/games?";
+	private $api_url           = "https://api.zxinfo.dk/v3/search/?";
+	private $api_url_publisher = "https://api.zxinfo.dk/v3/publishers/%s/games?";
+	private $api_url_author    = "https://api.zxinfo.dk/v3/authors/%s/games?";
 
 	/**
 	 * Repository URL
 	 */
-	private $archive1_url = "http://www.worldofspectrum.org";
+	private $archive1_url = "https://archive.org/download/World_of_Spectrum_June_2017_Mirror/World%20of%20Spectrum%20June%202017%20Mirror.zip/World%20of%20Spectrum%20June%202017%20Mirror";
 	private $archive2_url = "https://spectrumcomputing.co.uk";
 
 	/**
 	 * Frontend Search
 	 */
-	private $search_url = "http://zxinfo.dk/search/";
+	private $search_url = "https://zxinfo.dk/search/";
 
 	/**
 	 * Frontend details
@@ -55,6 +55,8 @@ class zxdbCommand extends UserCommand
 		$chat_id = $message->getChat()->getId();
 		$command_str = trim($message->getText(true));
 		$operator = false;
+
+		ini_set('user_agent', 'Speccybot '.$this->version);
 
 		$working_msg = Request::sendMessage([ "chat_id" => $chat_id, "text" => "Buscando en ZXDB..." ]);
 
@@ -123,7 +125,7 @@ class zxdbCommand extends UserCommand
 				'offset'      => ($random) ? "random" : "0",
 				'size'        => $outputlines,
 				"mode"        => "full",
-				"sort"        => "date_desc",
+				"sort"        => "rel_desc",
 				'contenttype' => "SOFTWARE"
 			);
 
@@ -151,18 +153,17 @@ class zxdbCommand extends UserCommand
 			}
 
 		} else if ($random) {
-			// Nothing as query, we try random stuff
+			// Nothing to query but random: we try random stuff
 			$options = array(
 				'offset'       => "random",
 				'availability' => "Available",
 				'size'         => "1",
 				"mode"         => "full",
-				"sort"         => "date_desc",
 				'contenttype'  => "SOFTWARE"
 			);
 			$api_url = $this->api_url;
 		} else {
-			// Nothing to random? Ok, we try just new things
+			// Nothing, no random? Ok, we try just new things
 			$options = array(
 				'offset'       => "0",
 				'size'         => $outputlines,
@@ -181,44 +182,44 @@ class zxdbCommand extends UserCommand
 		$data = json_decode($json, TRUE);
 
 		// How many we have?
-		$hits_total = $data['hits']['total'];
+		$hits_total = $data['hits']['total']['value'];
 
 		// Nothing found, inform and exit
 		if ( $hits_total == 0 ) {
-			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB.";
+			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB. Prueba /wos {$q}";
 			return $markdown;
 		}
 
 		foreach ( $data['hits']['hits'] as $hit ) {
 			$details_url = $this->details_url.$hit['_id'];
 			$source = $hit['_source'];
-			$title = $source['fulltitle'];
+			$title = $source['title'];
 			$link = false;
 
-			$publisher = $source['publisher'][0]['name'];
+			$publisher = $source['publishers'][0]['name'];
 			$publisher = ($publisher) ? " {$publisher}" : "";
 
 			// If we don't have a publisher, just use the author
 			if ( !$publisher ) {
-				$publisher = $source['authors'][0]['authors'][0]['name'];
+				$publisher = $source['authors'][0]['name'];
 				$publisher = ($publisher) ? " {$publisher}" : "";
 			}
 			
 			$availability = $source['availability'];
 			$availability = ($availability) ? " _".$availability."_" : "";
 
-			$year = $source['yearofrelease'];
+			$year = $source['originalYearOfRelease'];
 			$year = ($year) ? " (".$year.")" : "";
 
 			$markdown .= "\xF0\x9F\x95\xB9 [{$title}]({$details_url}) -{$publisher}{$year}{$availability}";
 			
 			// Lets see if the image is part of the releases
-			if ( !empty($source['releases'][0]['url']) ) {
-				$link = $source['releases'][0]['url'];
+			if ( !empty($source['releases'][0]['files'][0]['path']) ) {
+				$link = $source['releases'][0]['files'][0]['path'];
 				$archive = $this->archive1_url;
 			} else {
 				// If not, perhaps there is a link on the "additionals"
-				foreach ( $source['additionals'] as $additional ) {
+				foreach ( $source['additionalDownloads"'] as $additional ) {
 					if ( $additional['type'] == "Tape image" ) {
 						$link = $additional['url'];
 						$archive = $this->archive2_url;
@@ -229,12 +230,10 @@ class zxdbCommand extends UserCommand
 
 			// Now lets sanitize the links
 			if ( $link ) {
-				$link_parts = explode("/", $link);
-				array_walk($link_parts, function(&$val){
-					$val = urlencode($val);
-					return $val;
-				});
-				$link = $archive.implode("/", $link_parts);
+				if ( substr( $link, 0, 5 ) === "/pub/" )
+					$link = str_replace("%2Fpub%2F", $this->archive1_url, urlencode($link));
+				if ( substr( $link, 0, 6 ) === "/zxdb/" )
+					$link = $this->archive2_url . $link;
 				$markdown .= " - [Bajar]({$link})";
 			}
 
