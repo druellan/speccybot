@@ -14,8 +14,8 @@ class zxdbCommand extends UserCommand
 
 	protected $name = 'zxdb';
 	protected $description = 'Busca cosas de ZX Spectrum y ZX81 en la ZXDB (ZXInfo/Spectrum Computing).';
-	protected $usage = '/zxdb (--title) (--publisher) (--author) <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
-	protected $version = '1.6';
+	protected $usage = '/zxdb (--titulo) (--empresa) (--autor) <búsqueda> o /zxdb novedades o /zxdb sorpréndeme';
+	protected $version = '1.7';
 
 	/**
 	 * Source of information
@@ -28,6 +28,7 @@ class zxdbCommand extends UserCommand
 	private $api_url           = "https://api.zxinfo.dk/v3/search/?";
 	private $api_url_publisher = "https://api.zxinfo.dk/v3/publishers/%s/games?";
 	private $api_url_author    = "https://api.zxinfo.dk/v3/authors/%s/games?";
+	private $api_url_random    = "https://api.zxinfo.dk/v3/games/random/3";
 
 	/**
 	 * Repository URL
@@ -56,8 +57,6 @@ class zxdbCommand extends UserCommand
 		$command_str = trim($message->getText(true));
 		$operator = false;
 
-		ini_set('user_agent', 'Speccybot '.$this->version);
-
 		$working_msg = Request::sendMessage([ "chat_id" => $chat_id, "text" => "Buscando en ZXDB..." ]);
 
 		// Let's detect the modificator
@@ -84,7 +83,7 @@ class zxdbCommand extends UserCommand
 			case "quejugar":
 			case "random":
 
-			$response = "*Un juego aleatorio, cortesía de la* [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, $operator, true);
+			$response = "*Tres juegos aleatorios, cortesía de la* [ZXDB]({$this->source}):\n".$this->searchOnZXinfo(false, $operator, true);
 
 			break;
 			case "source":
@@ -104,6 +103,7 @@ class zxdbCommand extends UserCommand
 			'disable_web_page_preview' => true,
 			'parse_mode' => 'markdown'
 		];
+
 		return Request::editMessageText($data);
 	}
 
@@ -122,7 +122,7 @@ class zxdbCommand extends UserCommand
 			// Lets get ready with the query
 			// In this case, we have something to search for
 			$options = array(
-				'offset'      => ($random) ? "random" : "0",
+				'offset'      => "0",
 				'size'        => $outputlines,
 				"mode"        => "full",
 				"sort"        => "rel_desc",
@@ -132,8 +132,9 @@ class zxdbCommand extends UserCommand
 			switch($operator) {
 				case "publisher":
 				case "label":
-				case "empresa":
 				case "firma":
+				case "distribuidora":
+				case "empresa":
 
 					$api_url = sprintf($this->api_url_publisher, $q);
 
@@ -146,6 +147,7 @@ class zxdbCommand extends UserCommand
 				break;
 				case "title":
 				case "titulo":
+				case "título":
 				default:
 				
 					$options['query'] = $q;
@@ -154,14 +156,8 @@ class zxdbCommand extends UserCommand
 
 		} else if ($random) {
 			// Nothing to query but random: we try random stuff
-			$options = array(
-				'offset'       => "random",
-				'availability' => "Available",
-				'size'         => "1",
-				"mode"         => "full",
-				'contenttype'  => "SOFTWARE"
-			);
-			$api_url = $this->api_url;
+			$options = array();
+			$api_url = $this->api_url_random;
 		} else {
 			// Nothing, no random? Ok, we try just new things
 			$options = array(
@@ -178,7 +174,14 @@ class zxdbCommand extends UserCommand
 		$fetch_url = $api_url . $query;
 	
 		// Fetch the data
-		$json = file_get_contents($fetch_url);
+		try {
+			$json = file_get_contents($fetch_url);
+		} catch (\Throwable $th) {
+			$markdown = "Se produjo un error al intentar traer la información. Ni idea que pasó, pero intenta de nuevo más tarde.";
+			$markdown .= "[Debug] query: ".$fetch_url;
+			return $markdown;
+		}
+
 		$data = json_decode($json, TRUE);
 
 		// How many we have?
@@ -186,7 +189,8 @@ class zxdbCommand extends UserCommand
 
 		// Nothing found, inform and exit
 		if ( $hits_total == 0 ) {
-			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB. Prueba /wos {$q}";
+			$markdown = "No se encontró nada sobre *{$q}* en la ZXDB. Prueba con alguno de los filtros '--empresa', '--autor' o '--titulo'";
+			//$markdown .= "[Debug] query: ".$fetch_url;
 			return $markdown;
 		}
 
