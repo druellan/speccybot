@@ -219,13 +219,13 @@ class zxdbCommand extends UserCommand
 			
 			// Lets see if the image is part of the releases
 			if ( !empty($source['releases'][0]['files'][0]['path']) ) {
-				$link = $source['releases'][0]['files'][0]['path'];
+				$link = $this->escapePath($source['releases'][0]['files'][0]['path']);
 				$archive = $this->archive1_url;
 			} else {
 				// If not, perhaps there is a link on the "additionals"
 				foreach ( $source['additionalDownloads"'] as $additional ) {
 					if ( $additional['type'] == "Tape image" ) {
-						$link = $additional['url'];
+						$link = $this->escapePath($additional['url']);
 						$archive = $this->archive2_url;
 						break;
 					}
@@ -233,9 +233,11 @@ class zxdbCommand extends UserCommand
 			}
 
 			// Now lets sanitize the links
-			if ( $link ) {
+			// IMPORTANT, only do this if the title is available, just to avoid
+			// exposing commercial titles!
+			if ( $link && $source['availability'] == "Available" ) {
 				if ( substr( $link, 0, 5 ) === "/pub/" )
-					$link = str_replace("%2Fpub%2F", $this->archive1_url, urlencode($link));
+					$link = str_replace("%2Fpub%2F", $this->archive1_url, $link);
 				if ( substr( $link, 0, 6 ) === "/zxdb/" )
 					$link = $this->archive2_url . $link;
 				$markdown .= " - [Bajar]({$link})";
@@ -264,5 +266,9 @@ class zxdbCommand extends UserCommand
 		if ( !$q && !$random ) $markdown .= "\nMás novedades en [Spectrum Computing](https://spectrumcomputing.co.uk/index.php?cat=301)";
 
 		return $markdown;
+	}
+
+	private function escapePath($path) {
+		return implode('/', array_map('rawurlencode', explode('/', $path)));
 	}
 }
