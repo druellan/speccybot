@@ -245,6 +245,7 @@ class zxdbCommand extends UserCommand
 			// 	$markdown .= " - [Bajar]({$link})";
 			// }
 
+			// Removed: it is better to 
 			// Lets implement the online gamming
 			// Only TAP files are allowed, so
 			// foreach ( $source['additionals'] as $additional ) {
@@ -261,7 +262,7 @@ class zxdbCommand extends UserCommand
 		$hits_more = $hits_total - $outputlines;
 		if ( $hits_more > 0 && $q ) {
 			$search_more_url = $this->search_url . urlencode($q);
-			$markdown .= "\n[".$hits_more." resultados más en ZXInfo.dk]({$search_more_url})";
+			$markdown .= "\n[".$hits_more." resultados. Más en ZXInfo.dk]({$search_more_url})";
 		}
 
 		// If we are showing news, then just link to Spectrum Computing
