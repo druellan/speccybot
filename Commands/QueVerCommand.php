@@ -145,7 +145,7 @@ class QueVerCommand extends UserCommand
 		$resources = "";
 		
 		// Live events
-		if ( count($videolist['live']) ) {
+		if ( !empty($videolist['live']) && count($videolist['live']) ) {
 			foreach ( $videolist['live'] AS $item ) {
 				$flag = "🎙️";
 				$count++;
@@ -156,7 +156,7 @@ class QueVerCommand extends UserCommand
 		}
 
 		// Scheduled events
-		if ( count($videolist['upcoming']) ) {
+		if ( !empty($videolist['upcoming']) && count($videolist['upcoming']) ) {
 			foreach ( $videolist['upcoming'] AS $item ) {
 				$flag = "⏰";
 				$count++;
